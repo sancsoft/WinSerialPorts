@@ -30,23 +30,11 @@
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSerialPorts));
-            listBoxPorts = new ListBox();
             notifyIconPorts = new NotifyIcon(components);
+            listViewPorts = new ListView();
+            Port = new ColumnHeader();
+            Status = new ColumnHeader();
             SuspendLayout();
-            // 
-            // listBoxPorts
-            // 
-            listBoxPorts.AllowDrop = true;
-            listBoxPorts.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            listBoxPorts.FormattingEnabled = true;
-            listBoxPorts.ItemHeight = 15;
-            listBoxPorts.Location = new Point(0, 0);
-            listBoxPorts.Name = "listBoxPorts";
-            listBoxPorts.SelectionMode = SelectionMode.None;
-            listBoxPorts.Size = new Size(222, 154);
-            listBoxPorts.Sorted = true;
-            listBoxPorts.TabIndex = 0;
-            listBoxPorts.UseTabStops = false;
             // 
             // notifyIconPorts
             // 
@@ -55,12 +43,33 @@
             notifyIconPorts.Visible = true;
             notifyIconPorts.MouseDoubleClick += notifyIconPorts_MouseDoubleClick;
             // 
+            // listViewPorts
+            // 
+            listViewPorts.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listViewPorts.Columns.AddRange(new ColumnHeader[] { Port, Status });
+            listViewPorts.Location = new Point(1, 0);
+            listViewPorts.Name = "listViewPorts";
+            listViewPorts.Size = new Size(222, 165);
+            listViewPorts.TabIndex = 1;
+            listViewPorts.UseCompatibleStateImageBehavior = false;
+            listViewPorts.View = View.Details;
+            // 
+            // Port
+            // 
+            Port.Text = "Port";
+            Port.Width = 100;
+            // 
+            // Status
+            // 
+            Status.Text = "Status";
+            Status.Width = 100;
+            // 
             // frmSerialPorts
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(224, 161);
-            Controls.Add(listBoxPorts);
+            Controls.Add(listViewPorts);
             Icon = (Icon)resources.GetObject("$this.Icon");
             KeyPreview = true;
             Name = "frmSerialPorts";
@@ -71,8 +80,9 @@
         }
 
         #endregion
-
-        private ListBox listBoxPorts;
         private NotifyIcon notifyIconPorts;
+        private ListView listViewPorts;
+        private ColumnHeader Port;
+        private ColumnHeader Status;
     }
 }

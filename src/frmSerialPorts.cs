@@ -48,43 +48,46 @@ namespace WinSerialPorts
             }
             Enumerating = true;
 
-            listBoxPorts.Items.Clear();
-
-            Debug.WriteLine("Enumerating COM ports");
+            // start with an empty list
+            listViewPorts.Items.Clear();
+            List<SerialPortInfo> portList = new List<SerialPortInfo>();
+            
+            // get the set of ports and create a list of serial port info
             string[] ports = SerialPort.GetPortNames();
-            string notifyText = "";
-
             foreach (string port in ports)
             {
-                string portName = String.Format($"{port}: ");
-                try
+                SerialPortInfo serialPortInfo = new SerialPortInfo(port);
+                if (serialPortInfo.Number > 0)
                 {
-                    SerialPort sp = new SerialPort(port, 9600);
-                    sp.Open();
-                    sp.Close();
-                    portName += "Available";
+                    portList.Add(new SerialPortInfo(port));
                 }
-                catch (UnauthorizedAccessException)
+                else
                 {
-                    portName += "In Use";
+                    Debug.WriteLine($"Discarding invalid serial port {port}");
                 }
-                catch
-                {
-                    portName += "Error";
-                }
-                Debug.WriteLine(portName);
-                listBoxPorts.Items.Add(portName);
-                notifyText += portName + "\r";
             }
 
-            if (ports.Length == 0)
+            // sort the ports by number not the name
+            portList.Sort((x,y) => x.Number.CompareTo(y.Number));
+
+            // build the display list and notification text
+            string notifyText = "";
+            foreach (SerialPortInfo p in portList)
             {
-                Debug.WriteLine("No COM ports found by enumeration");
-                listBoxPorts.Items.Add("None");
-                notifyText = "No Ports Found";
+                ListViewItem item = new ListViewItem(p.Name);
+                item.SubItems.Add(p.Status);
+                listViewPorts.Items.Add(item);
+                notifyText += $"{p.Name}: {p.Status}\r";
             }
 
-            notifyIconPorts.Text = notifyText;
+            // make sure that we have valid notification text - not empty, not too long for tooltips
+            if (notifyText.Length == 0)
+            {
+                notifyText = "No ports found";
+            }
+            notifyIconPorts.Text = notifyText.Substring(0, (notifyText.Length > 127) ? 127 : notifyText.Length);
+
+            // allow entry now that we are done
             Enumerating = false;
         }
 

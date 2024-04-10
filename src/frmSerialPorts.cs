@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Drawing;
 using System.IO.Ports;
 
 namespace WinSerialPorts
@@ -6,6 +7,7 @@ namespace WinSerialPorts
     public partial class frmSerialPorts : Form
     {
         static bool Enumerating = false;
+        private SystemMenu systemMenu;
 
         /// <summary>
         ///  Form constructor - registers notification events from USB and enumerates ports
@@ -15,6 +17,13 @@ namespace WinSerialPorts
             InitializeComponent();
             UsbNotification.RegisterUsbDeviceNotification(this.Handle);
             EnumeratePorts();
+            // Create instance and connect it with the Form
+            systemMenu = new SystemMenu(this);
+
+            // Define commands and handler methods
+            // (Deferred until HandleCreated if it's too early)
+            // IDs are counted internally, separator is optional
+            systemMenu.AddCommand("&About…", OnSysMenuAbout, true);
         }
 
         /// <summary>
@@ -34,6 +43,8 @@ namespace WinSerialPorts
                         break;
                 }
             }
+            // pass messages to the system menu if it exists
+            systemMenu?.HandleMessage(ref m);
         }
 
         /// <summary>
@@ -128,6 +139,11 @@ namespace WinSerialPorts
         {
             Show();
             this.WindowState = FormWindowState.Normal;
+        }
+        private void OnSysMenuAbout()
+        {
+            AboutBox about = new AboutBox();
+            about.Show();
         }
     }
 }

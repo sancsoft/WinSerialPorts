@@ -1,13 +1,14 @@
 using System.Diagnostics;
-using System.Drawing;
 using System.IO.Ports;
 
 namespace WinSerialPorts
 {
     public partial class frmSerialPorts : Form
     {
+        private const int RefreshTime = 10000;
         static bool Enumerating = false;
         private SystemMenu systemMenu;
+        private System.Timers.Timer refreshTimer;
 
         /// <summary>
         ///  Form constructor - registers notification events from USB and enumerates ports
@@ -24,6 +25,12 @@ namespace WinSerialPorts
             // (Deferred until HandleCreated if it's too early)
             // IDs are counted internally, separator is optional
             systemMenu.AddCommand("&About…", OnSysMenuAbout, true);
+
+            // create a refresh timer to generate a periodic update of the display
+            refreshTimer = new System.Timers.Timer(RefreshTime);
+            refreshTimer.Elapsed += OnTimedEvent;
+            refreshTimer.AutoReset = true;
+            refreshTimer.Enabled = true;
         }
 
         /// <summary>
@@ -140,10 +147,24 @@ namespace WinSerialPorts
             Show();
             this.WindowState = FormWindowState.Normal;
         }
+
+        /// <summary>
+        /// Display the about box when picked from the system menu
+        /// </summary>
         private void OnSysMenuAbout()
         {
             AboutBox about = new AboutBox();
             about.Show();
+        }
+
+        /// <summary>
+        /// Refresh the display when the timer event hits
+        /// </summary>
+        /// <param name="sender">source</param>
+        /// <param name="e">event</param>
+        private void OnTimedEvent(object? sender, EventArgs e)
+        {
+            EnumeratePorts();
         }
     }
 }

@@ -1,6 +1,6 @@
 # WinSerialPorts
 
-<img width="128" alt="winserialports" src="https://github.com/user-attachments/assets/01820dfa-0500-4206-85fe-5878403bb324">
+<img width="256" alt="winserialports" src="https://github.com/user-attachments/assets/01820dfa-0500-4206-85fe-5878403bb324">
 
 Enumerate the available serial ports on Microsoft Windows.
 

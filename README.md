@@ -8,4 +8,4 @@ This Microsoft Windows program displays the installed serial ports along with a 
 
 Use the F5 key to force a scan of the serial ports.
 
-The application minimizes to a notification icon.  The tooltip for the notificaiton icon shows the serial port summary.
+The application minimizes to a notification icon.  The tooltip for the notification icon shows the serial port summary.

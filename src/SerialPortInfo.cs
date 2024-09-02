@@ -90,11 +90,21 @@ namespace WinSerialPorts
             return name;
         }
 
+        /// <summary>
+        /// Object compare for class
+        /// </summary>
+        /// <param name="obj">target object</param>
+        /// <returns>true if equal</returns>
         public override bool Equals(object? obj)
         {
             return base.Equals(obj as SerialPortInfo);
         }
 
+        /// <summary>
+        /// SerialPortInfo comparison
+        /// </summary>
+        /// <param name="other">target object</param>
+        /// <returns>true if equal</returns>
         public bool Equals(SerialPortInfo? other)
         {
             if (other == null) return false;

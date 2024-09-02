@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO.Ports;
+using Tulpep.NotificationWindow;
 
 namespace WinSerialPorts
 {
@@ -8,7 +9,6 @@ namespace WinSerialPorts
         private const int RefreshTime = 10000;
         static bool Enumerating = false;
         private SystemMenu systemMenu;
-        private System.Timers.Timer refreshTimer;
         private List<SerialPortInfo> previousPorts;
         private List<SerialPortInfo> currentPorts;
 
@@ -31,12 +31,6 @@ namespace WinSerialPorts
             // (Deferred until HandleCreated if it's too early)
             // IDs are counted internally, separator is optional
             systemMenu.AddCommand("&About…", OnSysMenuAbout, true);
-
-            // create a refresh timer to generate a periodic update of the display
-            //refreshTimer = new System.Timers.Timer(RefreshTime);
-            //refreshTimer.Elapsed += OnTimedEvent;
-            //refreshTimer.AutoReset = true;
-            //refreshTimer.Enabled = true;
         }
 
         /// <summary>
@@ -72,9 +66,10 @@ namespace WinSerialPorts
                 return;
             }
             Enumerating = true;
-
+            // wait until the new port notification comes online
+            Thread.Sleep(1000);
+            Debug.WriteLine("Started enumerating...");
             // start with an empty list
-            listViewPorts.Items.Clear();
             List<SerialPortInfo> portList = new List<SerialPortInfo>();
             
             // get the set of ports and create a list of serial port info
@@ -96,6 +91,7 @@ namespace WinSerialPorts
             portList.Sort((x,y) => x.Number.CompareTo(y.Number));
 
             // build the display list and notification text
+            listViewPorts.Items.Clear();
             string notifyText = "";
             foreach (SerialPortInfo p in portList)
             {
@@ -115,6 +111,7 @@ namespace WinSerialPorts
             // save the list of ports to find changes and notify
             currentPorts = portList;
 
+            Debug.WriteLine("... Done Enumerating.");
             // allow entry now that we are done
             Enumerating = false;
         }
@@ -130,18 +127,16 @@ namespace WinSerialPorts
                 {
                     newPreviousPorts.Add(p);
                 }
-                else
-                {
-                    Debug.WriteLine($"Port {p.Number} removed.");
-                }
             }
             // find any new ports
             foreach (SerialPortInfo p in currentPorts)
             {
                 if (!previousPorts.Contains(p))
                 {
-                    Debug.WriteLine($"Port {p.Number} added.");
                     newPreviousPorts.Add(p);
+                    // generate a popup notification
+                    SerialPopup popup = new SerialPopup(this.Icon?.ToBitmap(), "Serial Port Detected", String.Format($"{p.Name}: {p.Status}"));
+                    popup.Popup();
                 }
             }
             previousPorts = newPreviousPorts;
@@ -194,18 +189,6 @@ namespace WinSerialPorts
         {
             AboutBox about = new AboutBox();
             about.Show();
-        }
-
-        /// <summary>
-        /// Refresh the display when the timer event hits
-        /// </summary>
-        /// <param name="sender">source</param>
-        /// <param name="e">event</param>
-        private void OnTimedEvent(object? sender, EventArgs e)
-        {
-            Debug.WriteLine("Timed refresh");
-            EnumeratePorts();
-            ChangeNotifications();
         }
     }
 }

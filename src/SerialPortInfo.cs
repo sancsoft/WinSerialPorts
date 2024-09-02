@@ -2,7 +2,7 @@
 
 namespace WinSerialPorts
 {
-    internal class SerialPortInfo
+    internal class SerialPortInfo : IEquatable<SerialPortInfo>
     {
         /// <summary>
         /// Default constructor
@@ -88,6 +88,17 @@ namespace WinSerialPorts
                 }
             }
             return name;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return base.Equals(obj as SerialPortInfo);
+        }
+
+        public bool Equals(SerialPortInfo? other)
+        {
+            if (other == null) return false;
+            return (other.Number == Number);
         }
 
         public int Number { get; set; }

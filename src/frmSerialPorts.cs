@@ -9,6 +9,8 @@ namespace WinSerialPorts
         static bool Enumerating = false;
         private SystemMenu systemMenu;
         private System.Timers.Timer refreshTimer;
+        private List<SerialPortInfo> previousPorts;
+        private List<SerialPortInfo> currentPorts;
 
         /// <summary>
         ///  Form constructor - registers notification events from USB and enumerates ports
@@ -16,8 +18,12 @@ namespace WinSerialPorts
         public frmSerialPorts()
         {
             InitializeComponent();
-            UsbNotification.RegisterUsbDeviceNotification(this.Handle);
+            currentPorts = new List<SerialPortInfo>();
+            previousPorts = new List<SerialPortInfo>();
             EnumeratePorts();
+            previousPorts = currentPorts;
+            UsbNotification.RegisterUsbDeviceNotification(this.Handle);
+
             // Create instance and connect it with the Form
             systemMenu = new SystemMenu(this);
 
@@ -27,10 +33,10 @@ namespace WinSerialPorts
             systemMenu.AddCommand("&About…", OnSysMenuAbout, true);
 
             // create a refresh timer to generate a periodic update of the display
-            refreshTimer = new System.Timers.Timer(RefreshTime);
-            refreshTimer.Elapsed += OnTimedEvent;
-            refreshTimer.AutoReset = true;
-            refreshTimer.Enabled = true;
+            //refreshTimer = new System.Timers.Timer(RefreshTime);
+            //refreshTimer.Elapsed += OnTimedEvent;
+            //refreshTimer.AutoReset = true;
+            //refreshTimer.Enabled = true;
         }
 
         /// <summary>
@@ -47,6 +53,7 @@ namespace WinSerialPorts
                     case UsbNotification.DbtDeviceremovecomplete:
                     case UsbNotification.DbtDevicearrival:
                         EnumeratePorts();
+                        ChangeNotifications();
                         break;
                 }
             }
@@ -105,8 +112,39 @@ namespace WinSerialPorts
             }
             notifyIconPorts.Text = notifyText.Substring(0, (notifyText.Length > 127) ? 127 : notifyText.Length);
 
+            // save the list of ports to find changes and notify
+            currentPorts = portList;
+
             // allow entry now that we are done
             Enumerating = false;
+        }
+
+        protected void ChangeNotifications()
+        {
+            List<SerialPortInfo> newPreviousPorts = new List<SerialPortInfo>();
+
+            // throw out any ports that are gone
+            foreach (SerialPortInfo p in previousPorts)
+            {
+                if (currentPorts.Contains(p))
+                {
+                    newPreviousPorts.Add(p);
+                }
+                else
+                {
+                    Debug.WriteLine($"Port {p.Number} removed.");
+                }
+            }
+            // find any new ports
+            foreach (SerialPortInfo p in currentPorts)
+            {
+                if (!previousPorts.Contains(p))
+                {
+                    Debug.WriteLine($"Port {p.Number} added.");
+                    newPreviousPorts.Add(p);
+                }
+            }
+            previousPorts = newPreviousPorts;
         }
 
         /// <summary>
@@ -120,6 +158,7 @@ namespace WinSerialPorts
             if (e.KeyCode == Keys.F5)
             {
                 EnumeratePorts();
+                ChangeNotifications();
                 e.Handled = true;
             }
         }
@@ -164,7 +203,9 @@ namespace WinSerialPorts
         /// <param name="e">event</param>
         private void OnTimedEvent(object? sender, EventArgs e)
         {
+            Debug.WriteLine("Timed refresh");
             EnumeratePorts();
+            ChangeNotifications();
         }
     }
 }

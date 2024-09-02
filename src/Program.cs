@@ -9,10 +9,18 @@ namespace WinSerialPorts
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             ApplicationConfiguration.Initialize();
-            Application.Run(new frmSerialPorts());
+            Form form = new frmSerialPorts();
+            if (args.Length > 0) 
+            {
+                if (args[0] == "/minimize")
+                {
+                    form.WindowState = FormWindowState.Minimized;
+                }
+            }
+            Application.Run(form);
         }
     }
 }
